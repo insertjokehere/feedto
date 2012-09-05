@@ -1,4 +1,4 @@
-#!/usr/env python2
+#!/usr/bin/env python2
 import feedparser
 import subprocess
 import json
