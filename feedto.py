@@ -38,8 +38,8 @@ def rss(args):
 	for item in feed["items"]:
 		if not item["guid"] in seenlist and "links" in item.keys():
 			#print item["guid"]
-
-			subprocess.check_call(args["exec"] % {'url':item["links"][0]["href"]})
+			#print args["exec"] % {'url':item["links"][0]["href"]}
+			subprocess.check_call(args["exec"] % {'url':item["links"][0]["href"]},shell=True)
 
 			#_add(item["links"][0]["href"],"TV")
 			print item["links"][0]["href"]
