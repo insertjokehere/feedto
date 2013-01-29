@@ -41,7 +41,7 @@ def rss(args):
 			url = item["links"][0]["href"]
 			cmd = args["exec"] % {'url':url, 'serverpath':"/".join(url.split("/")[2:-1])+"/"}
 			print cmd
-			subprocess.check_call(cmd)
+			subprocess.check_call(cmd, shell=True)
 
 			#_add(item["links"][0]["href"],"TV")
 			print item["links"][0]["href"]
