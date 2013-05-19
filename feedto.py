@@ -33,14 +33,14 @@ def main():
 
 	args = parser.parse_args()
 
-	loadconfig(args["cfgFile"])
+	loadconfig(args.cfgFile)
 
-	if args["feed"] == "":
+	if args.feed == "":
 		for f in config['feeds'].keys():
-			subprocess.Popen([sys.executable, sys.argv[0], "--config", args["cfgFile"], "--feed", f])
+			subprocess.Popen([sys.executable, sys.argv[0], "--config", args.cfgFile, "--feed", f])
 	else:
 		fd = config.copy()
-		fd.update(config['feeds'][args["feed"]])
+		fd.update(config['feeds'][args.feed])
 		del fd["feeds"]
 		if lockFile(fd["seenfile"]+".lock"):
 			rss(fd)
