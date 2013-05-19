@@ -4,8 +4,20 @@ import subprocess
 import json
 import os
 import sys
+import fcntl
+import argparse
 
 config = {}
+
+def lockFile(lockfile):
+    fp = open(lockfile, 'w')
+
+    try:
+        fcntl.lockf(fp, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except IOError:
+        return False
+
+    return True
 
 def loadconfig(cfgFile):
 	global config
@@ -14,19 +26,24 @@ def loadconfig(cfgFile):
 	f.close()
 
 def main():
-	if len(sys.argv) > 1:
-		cfgFile = sys.argv[1]
+
+	parser = argparse.ArgumentParser(description="Download feed enclosures")
+	parser.add_argument("--config",default=os.path.join(os.getcwd(),"config.json"),help="The configuration file to use",dest="cfgFile")
+	parser.add_argument("--feed",default="",help="feed to process",dest="feed")
+
+	args = parser.parse_args()
+
+	loadconfig(args["cfgFile"])
+
+	if args["feed"] == "":
+		for f in config['feeds'].keys():
+			subprocess.Popen([sys.executable, sys.argv[0], "--config", args["cfgFile"], "--feed", f])
 	else:
-		cfgFile = os.path.join(os.getcwd(),"config.json")
-
-	loadconfig(cfgFile)
-
-	for f in config['feeds']:
 		fd = config.copy()
-		fd.update(f)
+		fd.update(config['feeds'][args["feed"]])
 		del fd["feeds"]
-		rss(fd)
-
+		if lockFile(fd["seenfile"]+".lock"):
+			rss(fd)
 
 def rss(args):
 	feed = feedparser.parse(args['url'])
