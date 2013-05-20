@@ -45,6 +45,7 @@ def main():
 		del fd["feeds"]
 		if lockFile(fd["seenfile"]+".lock"):
 			rss(fd)
+			unlock(fd["seenfile"]+".lock")
 
 def rss(args):
 	feed = feedparser.parse(args['url'])
