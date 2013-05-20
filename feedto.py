@@ -16,6 +16,10 @@ def lockFile(lockfile):
 		f.close()
 		return True
 
+def unlock(lockfile):
+	if os.path.exists(lockfile):
+		os.remove(lockfile)
+
 def loadconfig(cfgFile):
 	global config
 	f = open(cfgFile,"r")
