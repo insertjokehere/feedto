@@ -10,9 +10,9 @@ import argparse
 config = {}
 
 def lockFile(lockfile):
-    fp = open(lockfile, 'w')
-
+	
     try:
+    	fp = open(lockfile, 'w')
         fcntl.lockf(fp, fcntl.LOCK_EX | fcntl.LOCK_NB)
     except IOError:
         return False
