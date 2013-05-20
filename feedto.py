@@ -4,20 +4,17 @@ import subprocess
 import json
 import os
 import sys
-import fcntl
 import argparse
 
 config = {}
 
 def lockFile(lockfile):
-	
-    try:
-    	fp = open(lockfile, 'w')
-        fcntl.lockf(fp, fcntl.LOCK_EX | fcntl.LOCK_NB)
-    except IOError:
-        return False
-
-    return True
+	if os.path.exists(lockfile):
+		return False
+	else:
+		f = open(lockfile,"w")
+		f.close()
+		return True
 
 def loadconfig(cfgFile):
 	global config
@@ -63,8 +60,8 @@ def rss(args):
 			#_add(item["links"][0]["href"],"TV")
 			print item["links"][0]["href"]
 			seenlist.append(item["guid"])
-	f = open(args['seenfile'],"w")
-	json.dump(seenlist,f)
-	f.close()
+			f = open(args['seenfile'],"w")
+			json.dump(seenlist,f)
+			f.close()
 
 main()
