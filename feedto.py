@@ -41,7 +41,7 @@ def main():
 
 	if cmdargs.feed == "":
 		for f in config['feeds'].keys():
-			newargs = cmdargs[:]
+			newargs = sys.argv[1:]
 			if not "--feed" in newargs:
 				newargs.append("--feed")
 				newargs.append(f)
