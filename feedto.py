@@ -7,6 +7,7 @@ import sys
 import argparse
 
 config = {}
+args = {}
 
 def lockFile(lockfile):
 	if os.path.exists(lockfile):
@@ -27,10 +28,12 @@ def loadconfig(cfgFile):
 	f.close()
 
 def main():
+	global args
 
 	parser = argparse.ArgumentParser(description="Download feed enclosures")
 	parser.add_argument("--config",default=os.path.join(os.getcwd(),"config.json"),help="The configuration file to use",dest="cfgFile")
 	parser.add_argument("--feed",default="",help="feed to process",dest="feed")
+	parser.add_argument("--noop",action='store_true',help="Don't download anything, just update the seen list",dest="noop")
 
 	args = parser.parse_args()
 
@@ -60,7 +63,8 @@ def rss(args):
 			url = item["links"][0]["href"]
 			cmd = args["exec"] % {'url':url, 'serverpath':"/".join(url.split("/")[2:-1])+"/"}
 			print cmd
-			subprocess.check_call(cmd, shell=True)
+			if !args.noop:
+				subprocess.check_call(cmd, shell=True)
 
 			#_add(item["links"][0]["href"],"TV")
 			print item["links"][0]["href"]
