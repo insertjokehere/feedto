@@ -7,7 +7,7 @@ import sys
 import argparse
 
 config = {}
-args = {}
+cmdargs = {}
 
 def lockFile(lockfile):
 	if os.path.exists(lockfile):
@@ -28,23 +28,23 @@ def loadconfig(cfgFile):
 	f.close()
 
 def main():
-	global args
+	global cmdargs
 
 	parser = argparse.ArgumentParser(description="Download feed enclosures")
 	parser.add_argument("--config",default=os.path.join(os.getcwd(),"config.json"),help="The configuration file to use",dest="cfgFile")
 	parser.add_argument("--feed",default="",help="feed to process",dest="feed")
-	parser.add_argument("--noop",action='store_true',help="Don't download anything, just update the seen list",dest="noop")
+	parser.add_argument("--noop",default=False,action='store_true',help="Don't download anything, just update the seen list",dest="noop")
 
-	args = parser.parse_args()
+	cmdargs = parser.parse_args()
 
-	loadconfig(args.cfgFile)
+	loadconfig(cmdargs.cfgFile)
 
-	if args.feed == "":
+	if cmdargs.feed == "":
 		for f in config['feeds'].keys():
-			subprocess.Popen([sys.executable, sys.argv[0], "--config", args.cfgFile, "--feed", f])
+			subprocess.Popen([sys.executable, sys.argv[0], "--config", cmdargs.cfgFile, "--feed", f, "--noop" if cmdargs.noop else "" ])
 	else:
 		fd = config.copy()
-		fd.update(config['feeds'][args.feed])
+		fd.update(config['feeds'][cmdargs.feed])
 		del fd["feeds"]
 		if lockFile(fd["seenfile"]+".lock"):
 			rss(fd)
@@ -61,9 +61,15 @@ def rss(args):
 		if not item["guid"] in seenlist and "links" in item.keys():
 			#print item["guid"]
 			url = item["links"][0]["href"]
-			cmd = args["exec"] % {'url':url, 'serverpath':"/".join(url.split("/")[2:-1])+"/"}
-			print cmd
-			if !args.noop:
+
+			replace = {'url':url, 'serverpath':"/".join(url.split("/")[2:-1])+"/"}
+
+			for k in item.keys():
+				replace[k] = item[k]
+
+			cmd = args["exec"] % replace
+
+			if not cmdargs.noop:
 				subprocess.check_call(cmd, shell=True)
 
 			#_add(item["links"][0]["href"],"TV")
