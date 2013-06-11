@@ -67,10 +67,13 @@ def rss(args):
 			#print item["guid"]
 			url = item["links"][0]["href"]
 
-			replace = {'url':url, 'serverpath':"/".join(url.split("/")[2:-1])+"/"}
+			replace = {}
 
 			for k in item.keys():
 				replace[k] = item[k]
+
+			replace['url'] = url
+			replace['serverpath'] = "/".join(url.split("/")[2:-1])+"/"
 
 			cmd = args["exec"] % replace
 
