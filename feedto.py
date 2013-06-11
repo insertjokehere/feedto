@@ -41,7 +41,12 @@ def main():
 
 	if cmdargs.feed == "":
 		for f in config['feeds'].keys():
-			subprocess.Popen([sys.executable, sys.argv[0], "--config", cmdargs.cfgFile, "--feed", f, "--noop" if cmdargs.noop else "" ])
+			newargs = cmdargs[:]
+			if not "--feed" in newargs:
+				newargs.append("--feed")
+				newargs.append(f)
+
+			subprocess.Popen([sys.executable, sys.argv[0]]+newargs)
 	else:
 		fd = config.copy()
 		fd.update(config['feeds'][cmdargs.feed])
