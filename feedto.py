@@ -65,15 +65,15 @@ def rss(args):
 	for item in feed["items"]:
 		if not item["guid"] in seenlist and "links" in item.keys():
 			#print item["guid"]
-			url = item["links"][0]["href"]
 
 			replace = {}
 
 			for k in item.keys():
 				replace[k] = item[k]
 
-			replace['url'] = url
-			replace['serverpath'] = "/".join(url.split("/")[2:-1])+"/"
+			replace['enclosure'] = item["enclosures"][0]["href"]
+
+			print replace
 
 			cmd = args["exec"] % replace
 
