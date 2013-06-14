@@ -11,9 +11,18 @@ cmdargs = {}
 
 def lockFile(lockfile):
 	if os.path.exists(lockfile):
+		try:
+			f = open(lockfile,"r")
+			pid = f.read().strip()
+			f.close()
+			pids= [pid for pid in os.listdir('/proc') if pid.isdigit()]
+			return pid in pids
+		except:
+			print "failed to write to lock file"	
 		return False
 	else:
 		f = open(lockfile,"w")
+		f.write(str(os.getpid())+"\n")
 		f.close()
 		return True
 
