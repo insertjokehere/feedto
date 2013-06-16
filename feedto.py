@@ -84,6 +84,15 @@ class feed():
 	def getItems(self):
 		return self._items
 
+	def run(self):
+		for i in self.getItems():
+			try:
+				i.run(self._exec)
+				self._seenlist.see(i.guid())
+			except CalledProcessError as e:
+				log("Error running command",self._name)
+
+
 class feedItem():
 	def __init__(self, properties):
 		self._fmtkeys = ["title","link","guid"]
