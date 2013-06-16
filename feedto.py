@@ -87,7 +87,8 @@ class feed():
 	def run(self):
 		for i in self.getItems():
 			try:
-				i.run(self._exec)
+				if not cmdargs.noop:
+					i.run(self._exec)
 				self._seenlist.see(i.guid())
 			except CalledProcessError as e:
 				log("Error running command",self._name)
