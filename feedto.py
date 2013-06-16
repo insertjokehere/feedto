@@ -67,7 +67,7 @@ class feed():
 		self._url = url
 		self._seenlist = seenList(seenlist)
 		self._name = name
-		self._items = []
+		self._items = None
 		self._exec = command
 
 	def fetch(self):
@@ -85,6 +85,8 @@ class feed():
 		return self._items
 
 	def run(self):
+		if self._items is None:
+			self.fetch()
 		for i in self.getItems():
 			try:
 				if not cmdargs.noop:
@@ -158,43 +160,13 @@ def main():
 		fd = config.copy()
 		fd.update(config['feeds'][cmdargs.feed])
 		del fd["feeds"]
-		print "trying to lock"
-		#if lockFile(fd["seenfile"]+".lock"):
-		rss(fd)
-			#unlock(fd["seenfile"]+".lock")
+		log("Trying to get a lock...",cmdargs.feed)
+		lock = lockfile(fd["seenfile"]+".lock")
+		if lock.lock():
+			feedobj = feed(cmdargs.feed,fd["url"],fd["seenfile"],fd["exec"])
+			feedobj.run()
+			lock.unlock()
+		else:
+			log("Can't get a lock",cmdargs.feed)
 
-def rss(args):
-	fd = feed("test",args['url'],args['seenfile'])
-	fd.fetch()
-	#feed = feedparser.parse(args['url'])
-	#seenlist = []
-	#if os.path.exists(args['seenfile']):
-	#	f = open(args['seenfile'],"r")
-	#	seenlist = json.load(f)
-	#	f.close()
-	#for item in feed["items"]:
-	#	if not item["guid"] in seenlist and "links" in item.keys():
-	#		#print item["guid"]
-#
-#	#		replace = {}
-#
-#	#		for k in item.keys():
-#	#			replace[k] = item[k]
-#
-#	#		replace['enclosure'] = item["enclosures"][0]["href"]
-#
-#	#		print replace
-#
-#	#		cmd = args["exec"] % replace
-#
-#	#		if not cmdargs.noop:
-#	#			subprocess.check_call(cmd, shell=True)
-#
-#	#		#_add(item["links"][0]["href"],"TV")
-#	#		print item["links"][0]["href"]
-#	#		seenlist.append(item["guid"])
-#	#		f = open(args['seenfile'],"w")
-#	#		json.dump(seenlist,f)
-#	#		f.close()
-#
 main()
