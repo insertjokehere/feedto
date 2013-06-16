@@ -63,11 +63,12 @@ class seenList():
 			self._save()
 
 class feed():
-	def __init__(self, name, url, seenlist):
+	def __init__(self, name, url, seenlist, command):
 		self._url = url
 		self._seenlist = seenList(seenlist)
 		self._name = name
 		self._items = []
+		self._exec = command
 
 	def fetch(self):
 		log("Fetching feed...", self._name)
@@ -85,7 +86,7 @@ class feed():
 
 class feedItem():
 	def __init__(self, properties):
-		self._fmtkeys = ["title","link"]
+		self._fmtkeys = ["title","link","guid"]
 		self._props = properties
 
 	def formatKeys(self):
@@ -101,6 +102,9 @@ class feedItem():
 		else:
 			return ""
 
+	def guid(self):
+		return self._props["guid"]
+
 	def link(self):
 		if "enclosures" in self._props.keys() and len(self._props["enclosures"]) > 0:
 			return self._props["enclosures"][0]["href"]
@@ -108,6 +112,10 @@ class feedItem():
 			return self._props["link"]
 		else:
 			return ""
+
+	def run(self, command):
+		cmd = command % self.formatKeys()
+		subprocess.check_call(cmd, shell=True)
 
 
 def loadconfig(cfgFile):
