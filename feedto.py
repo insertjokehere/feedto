@@ -6,6 +6,7 @@ import os
 import sys
 import argparse
 import pipes 
+import re
 
 config = {}
 cmdargs = {}
@@ -15,6 +16,29 @@ def log(message, source=None):
 		print "[%s] %s" % (source, message)
 	else:
 		print message
+
+class modification(object):
+	def __init__(self, args):
+		self.args = args
+		del self.args["name"]
+
+	def apply(self, feed):
+		pass
+
+class modFilter(modification):
+	def __init__(self, args):
+		super(modFilter, self).__init__(args)
+
+	def apply(self, feed):
+		on = self.args["on"]
+		prog = re.compile(self.args["pattern"])
+		for i in feed.getItems():
+			if on in i._fmtkeys:
+				if prog.match(getattr(i,on)()):
+					log("Ignoring item %s" % i.title(), "filter")
+					feed.rmItem(i.guid())
+
+mods = {"filter":modFilter}
 
 class lockfile():
 	def __init__(self, path):
@@ -71,6 +95,14 @@ class feed():
 		self._name = name
 		self._items = None
 		self._exec = command
+		self._mods = []
+
+	def addMod(self, mod):
+		self._mods.append(mod)
+
+	def applyMods(self):
+		for m in self._mods:
+			m.apply(self)
 
 	def fetch(self):
 		log("Fetching feed...", self._name)
@@ -86,6 +118,12 @@ class feed():
 
 	def getItems(self):
 		return self._items
+
+	def rmItem(self, uid):
+		self._seenlist.see(uid)
+		for i in self._items:
+			if i.guid() == uid:
+				self._items.remove(i)
 
 	def run(self):
 		if self._items is None:
@@ -167,6 +205,15 @@ def main():
 		lock = lockfile(fd["seenfile"]+".lock")
 		if lock.lock():
 			feedobj = feed(cmdargs.feed,fd["url"],fd["seenfile"],fd["exec"])
+			feedobj.fetch()
+
+			if "mods" in fd.keys():
+				for m in fd["mods"]:
+					if "name" in m and m["name"] in mods.keys():
+						feedobj.addMod(mods[m["name"]](m))
+
+				feedobj.applyMods()
+
 			feedobj.run()
 			lock.unlock()
 		else:
