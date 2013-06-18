@@ -5,6 +5,7 @@ import json
 import os
 import sys
 import argparse
+import pipes 
 
 config = {}
 cmdargs = {}
@@ -106,7 +107,7 @@ class feedItem():
 	def formatKeys(self):
 		keys = {}
 		for k in self._fmtkeys:
-			keys[k] = getattr(self, k)()
+			keys[k] = pipes.quote(getattr(self, k)())
 
 		return keys
 
