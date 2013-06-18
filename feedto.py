@@ -42,15 +42,16 @@ class lockfile():
 
 class seenList():
 	def __init__(self, path):
-		if os.path.exists(path):
-			f = open(path,"r")
+		self._path = path
+		if os.path.exists(self._path):
+			f = open(self._path,"r")
 			self._list = json.load(f)
 			f.close()
 		else:
 			self._list = []
 
 	def _save(self):
-		f = open(path,"w")
+		f = open(self._path,"w")
 		json.dump(self._list,f)
 		f.close()
 
@@ -58,7 +59,7 @@ class seenList():
 		return uid in self._list
 
 	def see(self, uid):
-		if not hasSeen(uid):
+		if not self.hasSeen(uid):
 			self._list.append(uid)
 			self._save()
 
@@ -74,6 +75,7 @@ class feed():
 		log("Fetching feed...", self._name)
 		feed = feedparser.parse(self._url)
 		i = 0
+		self._items = []
 		for item in feed["items"]:
 			if not self._seenlist.hasSeen(item["guid"]):
 				i+=1
@@ -92,7 +94,7 @@ class feed():
 				if not cmdargs.noop:
 					i.run(self._exec)
 				self._seenlist.see(i.guid())
-			except CalledProcessError as e:
+			except subprocess.CalledProcessError as e:
 				log("Error running command",self._name)
 
 
