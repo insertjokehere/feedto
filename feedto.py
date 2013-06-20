@@ -38,7 +38,22 @@ class modFilter(modification):
 					log("Ignoring item %s" % i.title(), "filter")
 					feed.rmItem(i.guid())
 
-mods = {"filter":modFilter}
+class modRewrite(modification):
+	def __init__(self, args):
+		super(modRewrite, self).__init__(args)
+
+	def apply(self, feed):
+		prog = re.compile(self.args["pattern"])
+		subst = self.args["subst"]
+		on = self.args["on"]
+		for i in feed.getItems():
+			if on in i._fmtkeys:
+				old = feed.getFormatArg(on)
+				new = prog.sub(subst,old)
+				log("'%s' => '%s'" % (old, new), "rewrite")
+				feed.setFormatArg(on, new)
+
+mods = {"filter":modFilter, "rewrite":modRewrite}
 
 class lockfile():
 	def __init__(self, path):
@@ -140,14 +155,20 @@ class feed():
 class feedItem():
 	def __init__(self, properties):
 		self._fmtkeys = ["title","link","guid"]
+		self._fmtargs = {}
 		self._props = properties
 
-	def formatKeys(self):
-		keys = {}
-		for k in self._fmtkeys:
-			keys[k] = pipes.quote(getattr(self, k)())
+	def getFormatArg(self,arg):
+		if arg in self._fmtargs.keys():
+			return self._fmtargs[arg]
+		else if arg in self._fmtkeys:
+			self._fmtargs[arg] = pipes.quote(getattr(self, k)())
+			return self._fmtargs[arg]
+		else:
+			return ""
 
-		return keys
+	def setFormatArg(self, arg, value):
+		self._fmtargs[arg] = value
 
 	def title(self):
 		if "title" in self._props.keys():
