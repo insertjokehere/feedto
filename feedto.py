@@ -161,7 +161,7 @@ class feedItem():
 	def getFormatArg(self,arg):
 		if arg in self._fmtargs.keys():
 			return self._fmtargs[arg]
-		else if arg in self._fmtkeys:
+		elif arg in self._fmtkeys:
 			self._fmtargs[arg] = pipes.quote(getattr(self, k)())
 			return self._fmtargs[arg]
 		else:
@@ -201,9 +201,9 @@ def loadconfig(cfgFile):
 def main():
 	global cmdargs
 
-	parser = argparse.ArgumentParser(description="Download feed enclosures")
-	parser.add_argument("--config",default=os.path.join(os.getcwd(),"config.json"),help="The configuration file to use",dest="cfgFile")
-	parser.add_argument("--feed",default="",help="feed to process",dest="feed")
+	parser = argparse.ArgumentParser(description="Feed -> Anything")
+	parser.add_argument("--config",default=os.path.join(os.getcwd(),"config.json"),help="The configuration file to use, or ./config.json by default",dest="cfgFile")
+	parser.add_argument("--feed",default="",help="Specific feed to process. If ommited, all feeds will be processed in parallel",dest="feed")
 	parser.add_argument("--noop",default=False,action='store_true',help="Don't download anything, just update the seen list",dest="noop")
 
 	cmdargs = parser.parse_args()
