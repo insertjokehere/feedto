@@ -162,7 +162,7 @@ class feedItem():
 		if arg in self._fmtargs.keys():
 			return self._fmtargs[arg]
 		elif arg in self._fmtkeys:
-			self._fmtargs[arg] = pipes.quote(getattr(self, k)())
+			self._fmtargs[arg] = pipes.quote(getattr(self, arg)())
 			return self._fmtargs[arg]
 		else:
 			return ""
