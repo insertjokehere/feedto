@@ -187,6 +187,12 @@ class feedItem():
 		else:
 			return ""
 
+	def formatKeys(self):
+		r = {}
+		for f in self._fmtkeys:
+			r[f] = self.getFormatArg(f)
+		return r
+
 	def run(self, command):
 		cmd = command % self.formatKeys()
 		subprocess.check_call(cmd, shell=True)
