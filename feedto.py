@@ -180,8 +180,8 @@ class feedItem():
 		return self._props["guid"]
 
 	def link(self):
-		if "enclosures" in self._props.keys() and len(self._props["enclosures"]) > 0:
-			return self._props["enclosures"][0]["href"]
+		if len(self._props.enclosures) > 0:
+			return self._props.enclosures[0]["href"]
 		elif "link" in self._props.keys():
 			return self._props["link"]
 		else:
