@@ -66,7 +66,14 @@ class lockfile():
 				pid = f.read().strip()
 				f.close()
 				pids= [pid for pid in os.listdir('/proc') if pid.isdigit()]
-				return pid in pids
+				if not pid in pids:
+					log("Overwriting stale logfile")
+					f = open(self._path,"w")
+					f.write(str(os.getpid())+"\n")
+					f.close()
+					return True
+				else:
+					return False
 			except:
 				print "failed to write to lock file"	
 			return False
