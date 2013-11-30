@@ -7,6 +7,7 @@ import sys
 import argparse
 import pipes 
 import re
+import xmlrpclib
 
 config = {}
 cmdargs = {}
@@ -54,6 +55,34 @@ class modRewrite(modification):
 				feed.setFormatArg(on, new)
 
 mods = {"filter":modFilter, "rewrite":modRewrite}
+
+class action(object):
+        
+        def __init__(self, options):
+                self.options = options
+
+        def fetch(self, args):
+                pass
+
+class shellAction(action):
+
+        def fetch(self, args):
+                subprocess.check_call(self.options['command'] % (dict(args.items() + self.options.items)), shell=True)
+
+class aria2RPCAction(action):
+        
+        def __init__(self, options):
+                super(aria2RPCAction, self).__init__(options)
+                self._s = xmlrpclib.ServerProxy(self.options['rpcpath'])
+
+        def fetch(self, args):
+                if 'ariaargs' in self.options:
+                        aargs = self.options['ariaargs']
+                else:
+                        aargs = {}
+                self._s.aria2.addUri(args['link'],aargs)
+                
+actions = {"command":shellAction, 'aria':aria2RPCAction}
 
 class lockfile():
 	def __init__(self, path):
@@ -111,13 +140,14 @@ class seenList():
 			self._save()
 
 class feed():
-	def __init__(self, name, url, seenlist, command):
+	def __init__(self, name, url, seenlist, command, action):
 		self._url = url
 		self._seenlist = seenList(seenlist)
 		self._name = name
 		self._items = None
 		self._exec = command
 		self._mods = []
+                self._action = action
 
 	def addMod(self, mod):
 		self._mods.append(mod)
@@ -200,9 +230,8 @@ class feedItem():
 			r[f] = self.getFormatArg(f)
 		return r
 
-	def run(self, command):
-		cmd = command % self.formatKeys()
-		subprocess.check_call(cmd, shell=True)
+	def run(self, action):
+		action.fetch(self.formatKeys)
 
 
 def loadconfig(cfgFile):
@@ -238,7 +267,11 @@ def main():
 		log("Trying to get a lock...",cmdargs.feed)
 		lock = lockfile(fd["seenfile"]+".lock")
 		if lock.lock():
-			feedobj = feed(cmdargs.feed,fd["url"],fd["seenfile"],fd["exec"])
+                        if not 'action' in fd.keys():
+                               fd['action'] = actions.keys()[0]
+
+                        action = actions[fd['action']](fd)
+			feedobj = feed(cmdargs.feed,fd["url"],fd["seenfile"],fd["exec"],action)
 			feedobj.fetch()
 
 			if "mods" in fd.keys():
