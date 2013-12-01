@@ -80,7 +80,7 @@ class aria2RPCAction(action):
                         aargs = self.options['ariaargs']
                 else:
                         aargs = {}
-                self._s.aria2.addUri(args['link'],aargs)
+                self._s.aria2.addUri([args['link']],aargs)
                 
 actions = {"command":shellAction, 'aria':aria2RPCAction}
 
