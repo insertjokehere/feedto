@@ -140,12 +140,11 @@ class seenList():
 			self._save()
 
 class feed():
-	def __init__(self, name, url, seenlist, command, action):
+	def __init__(self, name, url, seenlist, action):
 		self._url = url
 		self._seenlist = seenList(seenlist)
 		self._name = name
 		self._items = None
-		self._exec = command
 		self._mods = []
                 self._action = action
 
@@ -183,7 +182,7 @@ class feed():
 		for i in self.getItems():
 			try:
 				if not cmdargs.noop:
-					i.run(self._exec)
+					i.run(self._action)
 				self._seenlist.see(i.guid())
 			except subprocess.CalledProcessError as e:
 				log("Error running command",self._name)
@@ -231,7 +230,7 @@ class feedItem():
 		return r
 
 	def run(self, action):
-		action.fetch(self.formatKeys)
+		action.fetch(self.formatKeys())
 
 
 def loadconfig(cfgFile):
@@ -271,7 +270,7 @@ def main():
                                fd['action'] = actions.keys()[0]
 
                         action = actions[fd['action']](fd)
-			feedobj = feed(cmdargs.feed,fd["url"],fd["seenfile"],fd["exec"],action)
+			feedobj = feed(cmdargs.feed,fd["url"],fd["seenfile"],action)
 			feedobj.fetch()
 
 			if "mods" in fd.keys():
