@@ -67,7 +67,7 @@ class action(object):
 class shellAction(action):
 
         def fetch(self, args):
-                subprocess.check_call(self.options['command'] % (dict(args.items() + self.options.items)), shell=True)
+                subprocess.check_call(self.options['command'] % (dict(args.items() + self.options.items())), shell=True)
 
 class aria2RPCAction(action):
         
